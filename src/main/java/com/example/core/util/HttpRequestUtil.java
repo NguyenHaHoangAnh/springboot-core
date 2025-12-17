@@ -1,5 +1,8 @@
 package com.example.core.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -16,6 +19,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class HttpRequestUtil {
+    private static final Logger log = LoggerFactory.getLogger(HttpRequestUtil.class);
+
     public static String sendGet(String url, String token, String xToken, int timeOut) throws Exception {
         return buildAndExecute(url, "", token, xToken, timeOut, REQUEST_TYPE.GET, "application/json");
     }
@@ -130,11 +135,13 @@ public class HttpRequestUtil {
         reader.close();
         String jsonResponse = response.toString();
         if (responseCode < 200 || responseCode > 299) {
+            log.error("Http request: url={}, payload={}, response={}", new Object[]{url, null, jsonResponse});
             if (exceptionOnError) {
                 throw new Exception("INTERNAL_SERVER_ERROR");
             }
         }
 
+        log.info("Http request: url={}, method={}, status={}, time={}ms", new Object[]{url, requestType, responseCode, System.currentTimeMillis() - start});
         return jsonResponse;
     }
 
